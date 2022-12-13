@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.yikuni.mc.reimueconomy.dao.ReimuEconomyDao">
   <resultMap id="BaseResultMap" type="com.yikuni.mc.reimueconomy.domain.ReimuEconomy">
-    <id column="uuid" jdbcType="VARCHAR" property="uuid" />
+    <id column="name" jdbcType="VARCHAR" property="name" />
     <result column="money" jdbcType="DOUBLE" property="money" />
   </resultMap>
   <sql id="Example_Where_Clause">
@@ -64,7 +64,7 @@
     </where>
   </sql>
   <sql id="Base_Column_List">
-    uuid, money
+    `name`, money
   </sql>
   <select id="selectByExample" parameterType="com.yikuni.mc.reimueconomy.domain.ReimuEconomyExample" resultMap="BaseResultMap">
     select
@@ -92,11 +92,11 @@
     select 
     <include refid="Base_Column_List" />
     from reimu_economy
-    where uuid = #{uuid,jdbcType=VARCHAR}
+    where `name` = #{name,jdbcType=VARCHAR}
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
     delete from reimu_economy
-    where uuid = #{uuid,jdbcType=VARCHAR}
+    where `name` = #{name,jdbcType=VARCHAR}
   </delete>
   <delete id="deleteByExample" parameterType="com.yikuni.mc.reimueconomy.domain.ReimuEconomyExample">
     delete from reimu_economy
@@ -104,11 +104,11 @@
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" keyColumn="uuid" keyProperty="uuid" parameterType="com.yikuni.mc.reimueconomy.domain.ReimuEconomy" useGeneratedKeys="true">
-    insert into reimu_economy (uuid, money)
-    values (#{uuid, jdbcType=VARCHAR}, #{money,jdbcType=DOUBLE})
+  <insert id="insert" keyColumn="name" keyProperty="name" parameterType="com.yikuni.mc.reimueconomy.domain.ReimuEconomy" useGeneratedKeys="true">
+    insert into reimu_economy (money)
+    values (#{money,jdbcType=DOUBLE})
   </insert>
-  <insert id="insertSelective" keyColumn="uuid" keyProperty="uuid" parameterType="com.yikuni.mc.reimueconomy.domain.ReimuEconomy" useGeneratedKeys="true">
+  <insert id="insertSelective" keyColumn="name" keyProperty="name" parameterType="com.yikuni.mc.reimueconomy.domain.ReimuEconomy" useGeneratedKeys="true">
     insert into reimu_economy
     <trim prefix="(" suffix=")" suffixOverrides=",">
       <if test="money != null">
@@ -127,11 +127,14 @@
       <include refid="Example_Where_Clause" />
     </if>
   </select>
+  <select id="hasAccount" parameterType="java.lang.String">
+    select count(*) from reimu_economy where `name` = #{record.name,jdbcType=VARCHAR}
+  </select>
   <update id="updateByExampleSelective" parameterType="map">
     update reimu_economy
     <set>
-      <if test="record.uuid != null">
-        uuid = #{record.uuid,jdbcType=VARCHAR},
+      <if test="record.name != null">
+        `name` = #{record.name,jdbcType=VARCHAR},
       </if>
       <if test="record.money != null">
         money = #{record.money,jdbcType=DOUBLE},
@@ -143,7 +146,7 @@
   </update>
   <update id="updateByExample" parameterType="map">
     update reimu_economy
-    set uuid = #{record.uuid,jdbcType=VARCHAR},
+    set `name` = #{record.name,jdbcType=VARCHAR},
       money = #{record.money,jdbcType=DOUBLE}
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
@@ -156,11 +159,14 @@
         money = #{money,jdbcType=DOUBLE},
       </if>
     </set>
-    where uuid = #{uuid,jdbcType=VARCHAR}
+    where `name` = #{name,jdbcType=VARCHAR}
   </update>
   <update id="updateByPrimaryKey" parameterType="com.yikuni.mc.reimueconomy.domain.ReimuEconomy">
     update reimu_economy
     set money = #{money,jdbcType=DOUBLE}
-    where uuid = #{uuid,jdbcType=VARCHAR}
+    where `name` = #{name,jdbcType=VARCHAR}
+  </update>
+  <update id="changeMoney" parameterType="map">
+    update reimu_economy set money = #{changeMoney,jdbcType=DOUBLE} + money where `name` = #{name,jdbcType=VARCHAR}
   </update>
 </mapper>

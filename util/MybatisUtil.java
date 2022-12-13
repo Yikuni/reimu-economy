@@ -1,7 +1,7 @@
 package com.yikuni.mc.reimueconomy.util;
 
 
-import com.yikuni.mc.reimueconomy.ReimuEconomy;
+import com.yikuni.mc.reimueconomy.ReimuEconomyPlugin;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -22,7 +22,7 @@ public class MybatisUtil {
             sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
         } catch (IOException e) {
             e.printStackTrace();
-            ReimuEconomy.INSTANCE.getPluginLoader().disablePlugin(ReimuEconomy.INSTANCE);
+            ReimuEconomyPlugin.getInstance().getPluginLoader().disablePlugin(ReimuEconomyPlugin.getInstance());
         }
     }
 

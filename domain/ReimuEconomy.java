@@ -7,18 +7,26 @@ import java.io.Serializable;
  * @author 
  */
 public class ReimuEconomy implements Serializable {
-    private String uuid;
+    private String name;
 
     private Double money;
 
-    private static final long serialVersionUID = 1L;
-
-    public String getUuid() {
-        return uuid;
+    public ReimuEconomy() {
     }
 
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
+    public ReimuEconomy(String name, Double money) {
+        this.name = name;
+        this.money = money;
+    }
+
+    private static final long serialVersionUID = 1L;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public Double getMoney() {
@@ -41,7 +49,7 @@ public class ReimuEconomy implements Serializable {
             return false;
         }
         ReimuEconomy other = (ReimuEconomy) that;
-        return (this.getUuid() == null ? other.getUuid() == null : this.getUuid().equals(other.getUuid()))
+        return (this.getName() == null ? other.getName() == null : this.getName().equals(other.getName()))
             && (this.getMoney() == null ? other.getMoney() == null : this.getMoney().equals(other.getMoney()));
     }
 
@@ -49,7 +57,7 @@ public class ReimuEconomy implements Serializable {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((getUuid() == null) ? 0 : getUuid().hashCode());
+        result = prime * result + ((getName() == null) ? 0 : getName().hashCode());
         result = prime * result + ((getMoney() == null) ? 0 : getMoney().hashCode());
         return result;
     }
@@ -60,7 +68,7 @@ public class ReimuEconomy implements Serializable {
         sb.append(getClass().getSimpleName());
         sb.append(" [");
         sb.append("Hash = ").append(hashCode());
-        sb.append(", uuid=").append(uuid);
+        sb.append(", name=").append(name);
         sb.append(", money=").append(money);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");

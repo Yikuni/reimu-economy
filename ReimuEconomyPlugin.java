@@ -6,13 +6,11 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public final class ReimuEconomy extends JavaPlugin {
-    public static JavaPlugin INSTANCE;
+public final class ReimuEconomyPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
         // Plugin startup logic
-        INSTANCE = this;
         getServer().getServicesManager().register(Economy.class, new ReimuEconomyImpl(), this, ServicePriority.Highest);
         RegisteredServiceProvider<Economy> eco = getServer().getServicesManager().getRegistration(Economy.class);
     }
@@ -20,5 +18,9 @@ public final class ReimuEconomy extends JavaPlugin {
     @Override
     public void onDisable() {
         // Plugin shutdown logic
+    }
+
+    public static ReimuEconomyPlugin getInstance(){
+        return JavaPlugin.getPlugin(ReimuEconomyPlugin.class);
     }
 }

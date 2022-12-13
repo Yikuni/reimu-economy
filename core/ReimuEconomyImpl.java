@@ -1,30 +1,34 @@
 package com.yikuni.mc.reimueconomy.core;
 
-import com.yikuni.mc.reimueconomy.ReimuEconomy;
+import com.yikuni.mc.reimueconomy.ReimuEconomyPlugin;
+import com.yikuni.mc.reimueconomy.dao.ReimuEconomyDao;
+import com.yikuni.mc.reimueconomy.domain.ReimuEconomy;
+import com.yikuni.mc.reimueconomy.util.MybatisUtil;
 import net.milkbowl.vault.economy.AbstractEconomy;
 import net.milkbowl.vault.economy.EconomyResponse;
-import org.bukkit.Bukkit;
+import org.apache.ibatis.session.SqlSession;
 
 import java.util.List;
 
 public class ReimuEconomyImpl extends AbstractEconomy {
-    private final String simbol;
+    private final String symbol;
     private final String currencyNamePlural;
     private final String currencyNameSingular;
+    private final Double initialMoney;
     public ReimuEconomyImpl(){
-        String simbol1 = ReimuEconomy.INSTANCE.getConfig().getString("currency.symbol");
-        simbol = simbol1 == null? "coin": simbol1;
-        String currencyNamePlural1 = ReimuEconomy.INSTANCE.getConfig().getString("currency.name_plural");
+        String simbol1 = ReimuEconomyPlugin.getInstance().getConfig().getString("currency.symbol");
+        symbol = simbol1 == null? "coin": simbol1;
+        String currencyNamePlural1 = ReimuEconomyPlugin.getInstance().getConfig().getString("currency.name_plural");
         currencyNamePlural = currencyNamePlural1 == null? "CNY": currencyNamePlural1;
-        String currencyNameSingular1 = ReimuEconomy.INSTANCE.getConfig().getString("currency.name_singular");
+        String currencyNameSingular1 = ReimuEconomyPlugin.getInstance().getConfig().getString("currency.name_singular");
         currencyNameSingular = currencyNameSingular1 == null? "CNY": currencyNameSingular1;
-
+        initialMoney = ReimuEconomyPlugin.getInstance().getConfig().getDouble("currency.initial_money");
     }
 
 
     @Override
     public boolean isEnabled() {
-        return ReimuEconomy.INSTANCE.isEnabled();
+        return ReimuEconomyPlugin.getInstance().isEnabled();
     }
 
     @Override
@@ -44,7 +48,7 @@ public class ReimuEconomyImpl extends AbstractEconomy {
 
     @Override
     public String format(double amount) {
-        return String.format("%f %s", amount, simbol);
+        return String.format("%f %s", amount, symbol);
     }
 
     @Override
@@ -59,8 +63,11 @@ public class ReimuEconomyImpl extends AbstractEconomy {
 
     @Override
     public boolean hasAccount(String playerName) {
-
-        return false;
+        SqlSession session = MybatisUtil.getSqlSession();
+        ReimuEconomyDao mapper = session.getMapper(ReimuEconomyDao.class);
+        int i = mapper.hasAccount(playerName);
+        session.close();
+        return i > 0;
     }
 
     @Override
@@ -70,7 +77,12 @@ public class ReimuEconomyImpl extends AbstractEconomy {
 
     @Override
     public double getBalance(String playerName) {
-        return 0;
+        SqlSession session = MybatisUtil.getSqlSession();
+        ReimuEconomyDao mapper = session.getMapper(ReimuEconomyDao.class);
+        ReimuEconomy reimuEconomy = mapper.selectByPrimaryKey(playerName);
+        Double money = reimuEconomy.getMoney();
+        session.close();
+        return money;
     }
 
     @Override
@@ -80,32 +92,60 @@ public class ReimuEconomyImpl extends AbstractEconomy {
 
     @Override
     public boolean has(String playerName, double amount) {
-        return false;
+        return getBalance(playerName) >= amount;
     }
 
     @Override
     public boolean has(String playerName, String worldName, double amount) {
-        return false;
+        return has(playerName, amount);
     }
 
     @Override
     public EconomyResponse withdrawPlayer(String playerName, double amount) {
-        return null;
+        SqlSession session = MybatisUtil.getSqlSession();
+        ReimuEconomyDao mapper = session.getMapper(ReimuEconomyDao.class);
+        try{
+            ReimuEconomy reimuEconomy = mapper.selectByPrimaryKey(playerName);
+            if (reimuEconomy == null){
+                return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "Failed to find player account");
+            }
+            if (reimuEconomy.getMoney() >= amount){
+                reimuEconomy.setMoney(reimuEconomy.getMoney() - amount);
+                mapper.updateByPrimaryKey(reimuEconomy);
+            }else {
+                return new EconomyResponse(amount, reimuEconomy.getMoney(), EconomyResponse.ResponseType.SUCCESS, null);
+            }
+        }finally {
+            session.close();
+        }
+        return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "Unknown Error");
     }
 
     @Override
     public EconomyResponse withdrawPlayer(String playerName, String worldName, double amount) {
-        return null;
+        return withdrawPlayer(playerName, amount);
     }
 
     @Override
     public EconomyResponse depositPlayer(String playerName, double amount) {
-        return null;
+        SqlSession session = MybatisUtil.getSqlSession();
+        ReimuEconomyDao mapper = session.getMapper(ReimuEconomyDao.class);
+        try{
+            ReimuEconomy reimuEconomy = mapper.selectByPrimaryKey(playerName);
+            if (reimuEconomy == null){
+                return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "Failed to find player account");
+            }
+            reimuEconomy.setMoney(reimuEconomy.getMoney() + amount);
+            mapper.updateByPrimaryKey(reimuEconomy);
+        }finally {
+            session.close();
+        }
+        return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "Unknown Error");
     }
 
     @Override
     public EconomyResponse depositPlayer(String playerName, String worldName, double amount) {
-        return null;
+        return depositPlayer(playerName, amount);
     }
 
     @Override
@@ -155,17 +195,23 @@ public class ReimuEconomyImpl extends AbstractEconomy {
 
     @Override
     public boolean createPlayerAccount(String playerName) {
-        return false;
+        SqlSession session = MybatisUtil.getSqlSession();
+        ReimuEconomyDao mapper = session.getMapper(ReimuEconomyDao.class);
+        try {
+            mapper.insert(new ReimuEconomy(playerName, initialMoney));
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            session.close();
+        }
+        return true;
     }
 
     @Override
     public boolean createPlayerAccount(String playerName, String worldName) {
-        return false;
+        return createPlayerAccount(playerName);
     }
 
-    public String getPlayerUUID(String playerName){
-        return Bukkit.getOfflinePlayer(playerName).getUniqueId().toString();
-    }
 
 
 }

@@ -10,7 +10,7 @@ public interface ReimuEconomyDao {
 
     int deleteByExample(ReimuEconomyExample example);
 
-    int deleteByPrimaryKey(String uuid);
+    int deleteByPrimaryKey(String name);
 
     int insert(ReimuEconomy record);
 
@@ -18,7 +18,7 @@ public interface ReimuEconomyDao {
 
     List<ReimuEconomy> selectByExample(ReimuEconomyExample example);
 
-    ReimuEconomy selectByPrimaryKey(String uuid);
+    ReimuEconomy selectByPrimaryKey(String name);
 
     int updateByExampleSelective(@Param("record") ReimuEconomy record, @Param("example") ReimuEconomyExample example);
 
@@ -27,4 +27,8 @@ public interface ReimuEconomyDao {
     int updateByPrimaryKeySelective(ReimuEconomy record);
 
     int updateByPrimaryKey(ReimuEconomy record);
+
+    int hasAccount(String name);
+
+    int changeMoney(@Param("changeMoney") double changeMoney, @Param("name") String name);
 }
