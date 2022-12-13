@@ -105,8 +105,8 @@
     </if>
   </delete>
   <insert id="insert" keyColumn="name" keyProperty="name" parameterType="com.yikuni.mc.reimueconomy.domain.ReimuEconomy" useGeneratedKeys="true">
-    insert into reimu_economy (money)
-    values (#{money,jdbcType=DOUBLE})
+    insert into reimu_economy (`name`, money)
+    values (#{name,jdbcType=VARCHAR}, #{money,jdbcType=DOUBLE})
   </insert>
   <insert id="insertSelective" keyColumn="name" keyProperty="name" parameterType="com.yikuni.mc.reimueconomy.domain.ReimuEconomy" useGeneratedKeys="true">
     insert into reimu_economy
@@ -127,7 +127,7 @@
       <include refid="Example_Where_Clause" />
     </if>
   </select>
-  <select id="hasAccount" parameterType="java.lang.String">
+  <select id="hasAccount" parameterType="java.lang.String" resultType="java.lang.Integer">
     select count(*) from reimu_economy where `name` = #{record.name,jdbcType=VARCHAR}
   </select>
   <update id="updateByExampleSelective" parameterType="map">

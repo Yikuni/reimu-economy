@@ -9,8 +9,10 @@ import net.milkbowl.vault.economy.EconomyResponse;
 import org.apache.ibatis.session.SqlSession;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 public class ReimuEconomyImpl extends AbstractEconomy {
+    private final Logger log = ReimuEconomyPlugin.getInstance().getLogger();
     private final String symbol;
     private final String currencyNamePlural;
     private final String currencyNameSingular;
@@ -102,6 +104,7 @@ public class ReimuEconomyImpl extends AbstractEconomy {
 
     @Override
     public EconomyResponse withdrawPlayer(String playerName, double amount) {
+        log.info("withdraw called");
         SqlSession session = MybatisUtil.getSqlSession();
         ReimuEconomyDao mapper = session.getMapper(ReimuEconomyDao.class);
         try{
@@ -112,13 +115,14 @@ public class ReimuEconomyImpl extends AbstractEconomy {
             if (reimuEconomy.getMoney() >= amount){
                 reimuEconomy.setMoney(reimuEconomy.getMoney() - amount);
                 mapper.updateByPrimaryKey(reimuEconomy);
-            }else {
+                log.info("withdraw success, money = " + reimuEconomy.getMoney());
                 return new EconomyResponse(amount, reimuEconomy.getMoney(), EconomyResponse.ResponseType.SUCCESS, null);
+            }else {
+                return new EconomyResponse(0, reimuEconomy.getMoney(), EconomyResponse.ResponseType.FAILURE, "Not enough money");
             }
         }finally {
             session.close();
         }
-        return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "Unknown Error");
     }
 
     @Override
@@ -128,6 +132,8 @@ public class ReimuEconomyImpl extends AbstractEconomy {
 
     @Override
     public EconomyResponse depositPlayer(String playerName, double amount) {
+        log.info("deposit called");
+
         SqlSession session = MybatisUtil.getSqlSession();
         ReimuEconomyDao mapper = session.getMapper(ReimuEconomyDao.class);
         try{
@@ -137,6 +143,7 @@ public class ReimuEconomyImpl extends AbstractEconomy {
             }
             reimuEconomy.setMoney(reimuEconomy.getMoney() + amount);
             mapper.updateByPrimaryKey(reimuEconomy);
+            log.info("deposit success, money = " + reimuEconomy.getMoney());
         }finally {
             session.close();
         }
