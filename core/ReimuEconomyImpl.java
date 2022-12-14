@@ -104,7 +104,9 @@ public class ReimuEconomyImpl extends AbstractEconomy {
 
     @Override
     public EconomyResponse withdrawPlayer(String playerName, double amount) {
-        log.info("withdraw called");
+        if (amount < 0){
+            return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "withdraw amount must > 0");
+        }
         SqlSession session = MybatisUtil.getSqlSession();
         ReimuEconomyDao mapper = session.getMapper(ReimuEconomyDao.class);
         try{
@@ -115,7 +117,6 @@ public class ReimuEconomyImpl extends AbstractEconomy {
             if (reimuEconomy.getMoney() >= amount){
                 reimuEconomy.setMoney(reimuEconomy.getMoney() - amount);
                 mapper.updateByPrimaryKey(reimuEconomy);
-                log.info("withdraw success, money = " + reimuEconomy.getMoney());
                 return new EconomyResponse(amount, reimuEconomy.getMoney(), EconomyResponse.ResponseType.SUCCESS, null);
             }else {
                 return new EconomyResponse(0, reimuEconomy.getMoney(), EconomyResponse.ResponseType.FAILURE, "Not enough money");
@@ -132,8 +133,9 @@ public class ReimuEconomyImpl extends AbstractEconomy {
 
     @Override
     public EconomyResponse depositPlayer(String playerName, double amount) {
-        log.info("deposit called");
-
+        if (amount < 0){
+            return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "Deposit amount must > 0");
+        }
         SqlSession session = MybatisUtil.getSqlSession();
         ReimuEconomyDao mapper = session.getMapper(ReimuEconomyDao.class);
         try{
@@ -143,7 +145,6 @@ public class ReimuEconomyImpl extends AbstractEconomy {
             }
             reimuEconomy.setMoney(reimuEconomy.getMoney() + amount);
             mapper.updateByPrimaryKey(reimuEconomy);
-            log.info("deposit success, money = " + reimuEconomy.getMoney());
         }finally {
             session.close();
         }
